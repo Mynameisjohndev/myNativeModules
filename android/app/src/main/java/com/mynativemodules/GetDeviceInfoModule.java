@@ -20,6 +20,12 @@ import com.facebook.react.bridge.Arguments;
 import java.math.BigInteger;
 import java.util.Date;
 import java.text.DateFormat;
+import android.app.ActivityManager;
+import android.os.Debug;
+import android.content.Context;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
 
 public class GetDeviceInfoModule extends ReactContextBaseJavaModule {
 
@@ -100,5 +106,31 @@ public class GetDeviceInfoModule extends ReactContextBaseJavaModule {
         promise.reject("ERROR", "Package name not found");
       }
     }
+
+    @ReactMethod
+    public void getDeviceRAM(Promise promise) {
+        ActivityManager actManager = (ActivityManager) reactContext.getSystemService(Context.ACTIVITY_SERVICE);
+        ActivityManager.MemoryInfo memInfo = new ActivityManager.MemoryInfo();
+        actManager.getMemoryInfo(memInfo);
+        double totalMemory = memInfo.totalMem;
+        promise.resolve(totalMemory);
+    }
+
+    @ReactMethod
+    public void getDeviceCPUFrequency(Promise promise) {
+    try {
+        Process process = Runtime.getRuntime().exec("cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq");
+        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        String line = reader.readLine();
+        if (line != null) {
+            int maxFreq = Integer.parseInt(line) / 1000; // Convert from KHz to MHz
+            promise.resolve(maxFreq);
+        } else {
+            promise.reject("ERR_UNEXPECTED_EXCEPTION", "Could not read CPU frequency");
+        }
+    } catch (Exception e) {
+        promise.reject("ERR_UNEXPECTED_EXCEPTION", e);
+    }
+}
 
 }

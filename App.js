@@ -29,12 +29,28 @@ const checkDate = async () => {
   })
 }
 
+const checkMemory = () => {
+  return new Promise(async (resolve) => {
+    DeviceStorage.getDeviceRAM().then(totalMemory => {
+      console.log('Total memory:', totalMemory);
+    });
+  })
+}
+const getDeviceCPUInfo = () => {
+  return new Promise(async (resolve) => {
+    DeviceStorage.getDeviceCPUInfo().then(totalMemory => {
+      console.log('Total memory:', totalMemory);
+    });
+  })
+}
+
+
 export default function App() {
   return (
     <View style={styles.container}>
       <Text>Open up App.js to start working on your app!</Text>
       <StatusBar style="auto" />
-      <Button title='Checar' onPress={checkStorage} />
+      <Button title='Checar' onPress={getDeviceCPUInfo} />
     </View>
   );
 }

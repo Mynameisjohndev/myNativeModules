@@ -7,6 +7,6 @@ function formatBytes(bytes, decimals = 2) {
   console.log(parseFloat((bytes / Math.pow(k, i))));
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
-const size = 24351059968
+const size =  1863454720
 const convertedSize = formatBytes(size)
 console.log(convertedSize)
