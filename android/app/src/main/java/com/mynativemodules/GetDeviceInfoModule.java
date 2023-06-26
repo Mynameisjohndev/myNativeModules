@@ -18,7 +18,8 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.Arguments;
 import java.math.BigInteger;
-
+import java.util.Date;
+import java.text.DateFormat;
 
 public class GetDeviceInfoModule extends ReactContextBaseJavaModule {
 
@@ -87,11 +88,14 @@ public class GetDeviceInfoModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-      public void getInstallationTime(Promise promise) {
+    public void getInstallationTime(Promise promise) {
       try {
+        WritableMap day = Arguments.createMap();
         PackageInfo packageInfo = getReactApplicationContext().getPackageManager()
         .getPackageInfo(getReactApplicationContext().getPackageName(), 0);
-        promise.resolve(ackageInfo.firstInstallTime);
+        long lastTime = packageInfo.firstInstallTime;
+        day.putDouble("date", lastTime);
+        promise.resolve(day);
       } catch (NameNotFoundException e) {
         promise.reject("ERROR", "Package name not found");
       }

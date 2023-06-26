@@ -1,7 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
 import { StyleSheet, Text, View, NativeModules, Button } from 'react-native';
-import DeviceInfo from "react-native-device-info";
 const { DeviceStorage } = NativeModules;
 
 
@@ -17,12 +16,25 @@ const checkStorage = async () => {
   })
 }
 
+const checkDate = async () => {
+  return new Promise(async (resolve) => {
+    DeviceStorage.getInstallationTime()
+      .then(installationTime => {
+        let data = new Date(installationTime.date);
+        console.log(data);
+      })
+      .catch(error => {
+        console.error('Erro ao obter a data e hora de instalação:', error);
+      });
+  })
+}
+
 export default function App() {
   return (
     <View style={styles.container}>
       <Text>Open up App.js to start working on your app!</Text>
       <StatusBar style="auto" />
-      <Button title='Checar' onPress={checkStorage}/>
+      <Button title='Checar' onPress={checkStorage} />
     </View>
   );
 }
