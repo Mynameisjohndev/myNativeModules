@@ -4,6 +4,8 @@ import { StyleSheet, Text, View, NativeModules, Button } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
 const { DeviceStorage } = NativeModules;
 import { convertHzToMhz } from "./convertHzToMhz"
+import { PermissionsAndroid } from 'react-native';
+import { requestDeviceInformation } from './requestDeviceInformation';
 
 const checkStorage = async () => {
   return new Promise(async (resolve) => {
@@ -56,13 +58,15 @@ const getDeviceSOVersion = () => {
     });
   })
 }
-const getDeviceIMEI = () => {
+
+const getHu = () => {
   return new Promise(async (resolve) => {
-    DeviceStorage.getUniqueIdSync().then(device => {
+    DeviceStorage.checkReadPermissionReadExternalStorage().then(device => {
       console.log(device);
     });
   })
 }
+
 
 
 export default function App() {
@@ -70,7 +74,7 @@ export default function App() {
     <View style={styles.container}>
       <Text>Open up App.js to start working on your app!</Text>
       <StatusBar style="auto" />
-      <Button title='Checar' onPress={getDeviceIMEI} />
+      <Button title='Checar' onPress={requestDeviceInformation} />
     </View>
   );
 }

@@ -64,7 +64,7 @@ public class GetDeviceInfoModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void requestReadPermissionReadExternalStorage(Promise promise) {
         ActivityCompat.requestPermissions(getCurrentActivity(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
-        promise.resolve("requested");
+        promise.resolve("resolve");
     }
 
     @ReactMethod
@@ -76,12 +76,12 @@ public class GetDeviceInfoModule extends ReactContextBaseJavaModule {
                 totalStorage.putDouble("getBlockCount", statFs.getBlockCountLong());
                 totalStorage.putDouble("getBlockSize", statFs.getBlockSizeLong());
                 long total = statFs.getBlockCountLong() * statFs.getBlockSizeLong();
-                totalStorage.putDouble("total", total);
+                totalStorage.putDouble("DFESPACOTOTAL", total);
             } else {
                 totalStorage.putDouble("getBlockCount", statFs.getBlockCount());
                 totalStorage.putDouble("getBlockSize", statFs.getBlockSize());
                 long total = statFs.getBlockCount() * statFs.getBlockSize();
-                totalStorage.putDouble("total", total);
+                totalStorage.putDouble("DFESPACOTOTAL", total);
             }
             promise.resolve(totalStorage);
         } catch (Exception e) {
@@ -98,12 +98,12 @@ public class GetDeviceInfoModule extends ReactContextBaseJavaModule {
                 totalStorage.putDouble("getAvailableBlocks", statFs.getAvailableBlocksLong());
                 totalStorage.putDouble("getBlockSize", statFs.getBlockSizeLong());
                 long total = statFs.getAvailableBlocksLong() * statFs.getBlockSizeLong();
-                totalStorage.putDouble("total", total);
+                totalStorage.putDouble("DFESPACOUTILIZADO", total);
             } else {
                 totalStorage.putDouble("getAvailableBlocks", statFs.getAvailableBlocks());
                 totalStorage.putDouble("getBlockSize", statFs.getBlockSize());
                 long total = statFs.getAvailableBlocks() * statFs.getBlockSize();
-                totalStorage.putDouble("total", total);
+                totalStorage.putDouble("DFESPACOUTILIZADO", total);
             }
             promise.resolve(totalStorage); 
         } catch (Exception e) {
