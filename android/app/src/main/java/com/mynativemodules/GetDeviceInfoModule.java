@@ -50,54 +50,64 @@ public class GetDeviceInfoModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void getTotalStorage(Promise promise) {
-        if (ContextCompat.checkSelfPermission(reactContext, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-            try {
-                StatFs statFs = new StatFs(Environment.getExternalStorageDirectory().getAbsolutePath());
-                WritableMap totalStorage = Arguments.createMap();
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                    totalStorage.putDouble("getBlockCount", statFs.getBlockCountLong());
-                    totalStorage.putDouble("getBlockSize", statFs.getBlockSizeLong());
-                    long total = statFs.getBlockCountLong() * statFs.getBlockSizeLong();
-                    totalStorage.putDouble("total", total);
-                } else {
-                    totalStorage.putDouble("getBlockCount", statFs.getBlockCount());
-                    totalStorage.putDouble("getBlockSize", statFs.getBlockSize());
-                    long total = statFs.getBlockCount() * statFs.getBlockSize();
-                    totalStorage.putDouble("total", total);
-                }
-                promise.resolve(totalStorage);
-            } catch (Exception e) {
-                promise.reject("ERR_UNEXPECTED_EXCEPTION", e);
-            }
+    public void checkReadPermissionReadExternalStorage(Promise promise) {
+        int permissionStatus = ContextCompat.checkSelfPermission(reactContext, Manifest.permission.READ_EXTERNAL_STORAGE);
+        if (permissionStatus == PackageManager.PERMISSION_GRANTED) {
+            promise.resolve("granted");
+        } else if (permissionStatus == PackageManager.PERMISSION_DENIED) {
+            promise.resolve("denied");
         } else {
-            ActivityCompat.requestPermissions(getCurrentActivity(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+            promise.resolve("unknown");
+        }
+    }
+
+    @ReactMethod
+    public void requestReadPermissionReadExternalStorage(Promise promise) {
+        ActivityCompat.requestPermissions(getCurrentActivity(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+        promise.resolve("requested");
+    }
+
+    @ReactMethod
+    public void getTotalStorage(Promise promise) {
+        try {
+            StatFs statFs = new StatFs(Environment.getExternalStorageDirectory().getAbsolutePath());
+            WritableMap totalStorage = Arguments.createMap();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                totalStorage.putDouble("getBlockCount", statFs.getBlockCountLong());
+                totalStorage.putDouble("getBlockSize", statFs.getBlockSizeLong());
+                long total = statFs.getBlockCountLong() * statFs.getBlockSizeLong();
+                totalStorage.putDouble("total", total);
+            } else {
+                totalStorage.putDouble("getBlockCount", statFs.getBlockCount());
+                totalStorage.putDouble("getBlockSize", statFs.getBlockSize());
+                long total = statFs.getBlockCount() * statFs.getBlockSize();
+                totalStorage.putDouble("total", total);
+            }
+            promise.resolve(totalStorage);
+        } catch (Exception e) {
+            promise.reject("ERR_UNEXPECTED_EXCEPTION", e);
         }
     }
 
     @ReactMethod
     public void getUsedStorage(Promise promise) {
-        if (ContextCompat.checkSelfPermission(reactContext, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-            try {
-                StatFs statFs = new StatFs(Environment.getExternalStorageDirectory().getAbsolutePath());
-                WritableMap totalStorage = Arguments.createMap();
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                    totalStorage.putDouble("getAvailableBlocks", statFs.getAvailableBlocksLong());
-                    totalStorage.putDouble("getBlockSize", statFs.getBlockSizeLong());
-                    long total = statFs.getAvailableBlocksLong() * statFs.getBlockSizeLong();
-                    totalStorage.putDouble("total", total);
-                } else {
-                    totalStorage.putDouble("getAvailableBlocks", statFs.getAvailableBlocks());
-                    totalStorage.putDouble("getBlockSize", statFs.getBlockSize());
-                    long total = statFs.getAvailableBlocks() * statFs.getBlockSize();
-                    totalStorage.putDouble("total", total);
-                }
-                promise.resolve(totalStorage); 
-            } catch (Exception e) {
-                promise.reject("ERR_UNEXPECTED_EXCEPTION", e);
+        try {
+            StatFs statFs = new StatFs(Environment.getExternalStorageDirectory().getAbsolutePath());
+            WritableMap totalStorage = Arguments.createMap();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                totalStorage.putDouble("getAvailableBlocks", statFs.getAvailableBlocksLong());
+                totalStorage.putDouble("getBlockSize", statFs.getBlockSizeLong());
+                long total = statFs.getAvailableBlocksLong() * statFs.getBlockSizeLong();
+                totalStorage.putDouble("total", total);
+            } else {
+                totalStorage.putDouble("getAvailableBlocks", statFs.getAvailableBlocks());
+                totalStorage.putDouble("getBlockSize", statFs.getBlockSize());
+                long total = statFs.getAvailableBlocks() * statFs.getBlockSize();
+                totalStorage.putDouble("total", total);
             }
-        } else {
-            ActivityCompat.requestPermissions(getCurrentActivity(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+            promise.resolve(totalStorage); 
+        } catch (Exception e) {
+            promise.reject("ERR_UNEXPECTED_EXCEPTION", e);
         }
     }
 
@@ -192,7 +202,7 @@ public class GetDeviceInfoModule extends ReactContextBaseJavaModule {
         } catch (Exception e) {
             promise.reject("IMEI_ERROR", e);
         }
-        return null; // Add this return statement
+        return null; 
     }
 
 }
