@@ -7,8 +7,11 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Build;
 import android.os.Environment;
 import android.os.StatFs;
+import android.provider.Settings;
+import android.telephony.TelephonyManager;
 
 import androidx.core.app.ActivityCompat;
+import android.app.Activity;
 import androidx.core.content.ContextCompat;
 
 import com.facebook.react.bridge.Promise;
@@ -26,6 +29,11 @@ import android.content.Context;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.FileInputStream;
+import java.io.RandomAccessFile;
+
+import static android.provider.Settings.Secure.getString;
 
 public class GetDeviceInfoModule extends ReactContextBaseJavaModule {
 
@@ -117,20 +125,74 @@ public class GetDeviceInfoModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void getDeviceCPUFrequency(Promise promise) {
-    try {
-        Process process = Runtime.getRuntime().exec("cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq");
-        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-        String line = reader.readLine();
-        if (line != null) {
-            int maxFreq = Integer.parseInt(line) / 1000; // Convert from KHz to MHz
-            promise.resolve(maxFreq);
-        } else {
-            promise.reject("ERR_UNEXPECTED_EXCEPTION", "Could not read CPU frequency");
+    public void getCPUDetails(Promise promise) {
+        ProcessBuilder processBuilder;
+        String cpuDetails = "";
+        String[] DATA = {"/system/bin/cat", "/proc/cpuinfo"};
+        InputStream is;
+        Process process;
+        byte[] bArray;
+        bArray = new byte[1024];
+        try {
+            processBuilder = new ProcessBuilder(DATA);
+            process = processBuilder.start();
+            is = process.getInputStream();
+            while (is.read(bArray) != -1) {
+                cpuDetails = cpuDetails + new String(bArray);
+            }
+            is.close();
+            promise.resolve(cpuDetails);
+        } catch (IOException ex) {
+            promise.reject("Erro", ex);
         }
-    } catch (Exception e) {
-        promise.reject("ERR_UNEXPECTED_EXCEPTION", e);
     }
-}
+
+    @ReactMethod
+    public void getCPUFrequency(Promise promise) {
+        try {
+            RandomAccessFile reader = new RandomAccessFile("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq", "r");
+            String freq = reader.readLine();
+            reader.close();
+            promise.resolve(freq);
+        } catch (Exception e) {
+            promise.reject("ERR_UNEXPECTED_EXCEPTION", e);
+        }
+    }
+
+    @ReactMethod
+    public void getDeviceModel(Promise promise) {
+        String deviceModel = Build.MODEL;
+        promise.resolve(deviceModel);
+    }
+
+    @ReactMethod
+    public void getSystemVersion(Promise promise) {
+        String systemVersion = Build.VERSION.RELEASE;
+        promise.resolve(systemVersion);
+    }
+
+    @ReactMethod
+    public void getUniqueIdSync(Promise promise) { 
+        String id = getString(getReactApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
+        promise.resolve(id); 
+    }
+
+    @ReactMethod
+    public String getDeviceIMEI(Promise promise) {
+        try {
+            String deviceUniqueIdentifier = null;
+            TelephonyManager tm = (TelephonyManager) reactContext.getSystemService(Context.TELEPHONY_SERVICE);
+            if (null != tm) {
+                deviceUniqueIdentifier = tm.getDeviceId();
+            }
+            if (null == deviceUniqueIdentifier || 0 == deviceUniqueIdentifier.length()) {
+                deviceUniqueIdentifier =  getString(getReactApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
+            }
+            promise.resolve(deviceUniqueIdentifier);
+        } catch (Exception e) {
+            promise.reject("IMEI_ERROR", e);
+        }
+        return null; // Add this return statement
+    }
 
 }
