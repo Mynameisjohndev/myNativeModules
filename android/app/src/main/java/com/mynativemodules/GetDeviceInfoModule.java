@@ -32,6 +32,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.FileInputStream;
 import java.io.RandomAccessFile;
+import java.util.Locale;
+import java.text.SimpleDateFormat;
 
 import static android.provider.Settings.Secure.getString;
 
@@ -111,18 +113,27 @@ public class GetDeviceInfoModule extends ReactContextBaseJavaModule {
         }
     }
 
-    @ReactMethod
-    public void getInstallationTime(Promise promise) {
-      try {
-        WritableMap day = Arguments.createMap();
-        PackageInfo packageInfo = getReactApplicationContext().getPackageManager()
-        .getPackageInfo(getReactApplicationContext().getPackageName(), 0);
-        long lastTime = packageInfo.firstInstallTime;
-        day.putDouble("date", lastTime);
-        promise.resolve(day);
-      } catch (NameNotFoundException e) {
-        promise.reject("ERROR", "Package name not found");
-      }
+   @ReactMethod
+        public void getInstallationTime(Promise promise) {
+        try {
+            WritableMap result = Arguments.createMap();
+            PackageInfo packageInfo = getReactApplicationContext().getPackageManager()
+                .getPackageInfo(getReactApplicationContext().getPackageName(), 0);
+            long installTime = packageInfo.firstInstallTime;
+            Date date = new Date(installTime);
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
+            String dateString = dateFormat.format(date);
+            String timeString = timeFormat.format(date);
+
+            // Adicionar os valores ao objeto de resultado
+            result.putString("DFDATAINSTALACAO", dateString);
+            result.putString("DFHORAINSTALACAO", timeString);
+
+            promise.resolve(result);
+        } catch (NameNotFoundException e) {
+            promise.reject("ERROR", "Package name not found");
+        }
     }
 
     @ReactMethod
